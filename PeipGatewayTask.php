@@ -44,7 +44,7 @@ class PeipGatewayTask extends Task
 	 */
 	function setConfigfile($configfile)
 	{
-		$this->configfile = $configfile;
+		$this->configfile = $configfile; 
 	}
 
 	/**
@@ -76,10 +76,8 @@ class PeipGatewayTask extends Task
 	//
 	
 	function init() 
-	{
-		if(file_exists($this->configfile)){
-			$this->context = PEIP_XML_Context::createFromFile($this->configfile);
-		}
+	{		
+
 	}
 	
     //
@@ -88,9 +86,23 @@ class PeipGatewayTask extends Task
 
 	function main()
 	{
+		if(file_exists($this->getConfigfile())){
+			$this->context = PEIP_XML_Context::createFromFile($this->configfile);
+		}else{
+			$this->log("ERROR: Could not create Context.");
+			$this->log("ERROR: File '".$this->getConfigfile()."' does not exist");	
+		}
 		if(isset($this->context)){
-			$gateway = $this->context->getGateway('FacebookGateway');
-			$gateway->send($this->message);
+			$gateway = $this->context->getGateway($this->getGateway());
+			if($gateway){
+				$this->log("Sending Message through Gateway: '" .$this->getGateway(). "'");
+				$this->log("Message: '" .$this->getMessage(). "'");
+				$gateway->send($this->message);
+			}else{
+				$this->log("ERROR: Could not get Gateway: ".$this->getGateway());
+			}
+		}else{
+			$this->log("ERROR: Could not get Context.");
 		}	
 	}
 	
